@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Character : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class Character : MonoBehaviour
 
     public int healthCount;
     public int coinCount;
+    int Coinleft;
 
     private Rigidbody2D rb;
     private Animator animator;
@@ -19,6 +21,8 @@ public class Character : MonoBehaviour
 
     public AudioClip[] AudioClipArr;
     private AudioSource audioSource;
+
+    bool isOnground = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -33,38 +37,17 @@ public class Character : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float hVelocity = 0;
-        float vVelocity = 0;
+        movement();
 
-        if(Input.GetKey(KeyCode.LeftArrow))
+        Coinleft = GameObject.FindGameObjectsWithTag("Coin").Length;
+        if(healthCount == 0)
         {
-            hVelocity = -moveSpeed;
-            transform.localScale = new Vector3(-1, 1, 1);
-            animator.SetFloat("xVelocity", Mathf.Abs(hVelocity));
-            audioSource.PlayOneShot(AudioClipArr[1]);
-
+            SceneManager.LoadScene("LoseScene");
         }
-        else if (Input.GetKey(KeyCode.RightArrow))
+        if(Coinleft == 0)
         {
-            hVelocity = moveSpeed;
-            transform.localScale = new Vector3(1, 1, 1);
-            animator.SetFloat("xVelocity", Mathf.Abs(hVelocity));
-            audioSource.PlayOneShot(AudioClipArr[1]);
+            SceneManager.LoadScene("WinScene");
         }
-        else
-        {
-            animator.SetFloat("xVelocity", 0);
-        }
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            vVelocity = jumpForce;
-            animator.SetTrigger("Jumptrigger");
-            audioSource.PlayOneShot(AudioClipArr[3]);
-        }
-
-        hVelocity = Mathf.Clamp(rb.velocity.x + hVelocity, -5, 5);
-
-        rb.velocity = new Vector2(hVelocity, rb.velocity.y + vVelocity);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -84,5 +67,46 @@ public class Character : MonoBehaviour
             Cointext.GetComponent<Text>().text = ("Coin: " + coinCount);
             audioSource.PlayOneShot(AudioClipArr[0]);
         }
+
+        if(collision.gameObject.tag == "Ground")
+        {
+            isOnground = true;
+        }
+    }
+
+    private void movement()
+    {
+        float hVelocity = 0;
+        float vVelocity = 0;
+
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            hVelocity = -moveSpeed;
+            transform.localScale = new Vector3(-1, 1, 1);
+            animator.SetFloat("xVelocity", Mathf.Abs(hVelocity));
+
+        }
+        else if (Input.GetKey(KeyCode.RightArrow))
+        {
+            hVelocity = moveSpeed;
+            transform.localScale = new Vector3(1, 1, 1);
+            animator.SetFloat("xVelocity", Mathf.Abs(hVelocity));
+
+        }
+        else
+        {
+            animator.SetFloat("xVelocity", 0);
+        }
+        if (Input.GetKeyDown(KeyCode.Space) && isOnground == true)
+        {
+            vVelocity = jumpForce;
+            animator.SetTrigger("Jumptrigger");
+            audioSource.PlayOneShot(AudioClipArr[3]);
+            isOnground = false;
+        }
+
+        hVelocity = Mathf.Clamp(rb.velocity.x + hVelocity, -5, 5);
+
+        rb.velocity = new Vector2(hVelocity, rb.velocity.y + vVelocity);
     }
 }
