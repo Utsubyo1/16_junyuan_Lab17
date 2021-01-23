@@ -11,6 +11,7 @@ public class Character : MonoBehaviour
 
     public int healthCount;
     public int coinCount;
+    
     int Coinleft;
 
     private Rigidbody2D rb;
@@ -23,6 +24,7 @@ public class Character : MonoBehaviour
     private AudioSource audioSource;
 
     bool isOnground = true;
+    bool iswalking = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -85,6 +87,8 @@ public class Character : MonoBehaviour
             transform.localScale = new Vector3(-1, 1, 1);
             animator.SetFloat("xVelocity", Mathf.Abs(hVelocity));
 
+            iswalking = true;
+
         }
         else if (Input.GetKey(KeyCode.RightArrow))
         {
@@ -92,10 +96,13 @@ public class Character : MonoBehaviour
             transform.localScale = new Vector3(1, 1, 1);
             animator.SetFloat("xVelocity", Mathf.Abs(hVelocity));
 
+            iswalking = true;
+
         }
         else
         {
             animator.SetFloat("xVelocity", 0);
+            iswalking = false;
         }
         if (Input.GetKeyDown(KeyCode.Space) && isOnground == true)
         {
@@ -108,5 +115,15 @@ public class Character : MonoBehaviour
         hVelocity = Mathf.Clamp(rb.velocity.x + hVelocity, -5, 5);
 
         rb.velocity = new Vector2(hVelocity, rb.velocity.y + vVelocity);
+
+        if(iswalking == true && isOnground == true)
+        {
+            audioSource.clip = AudioClipArr[1];
+
+            if (!audioSource.isPlaying)
+            {
+                audioSource.Play();
+            }
+        }
     }
 }
